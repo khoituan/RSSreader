@@ -15,7 +15,11 @@
     NSMutableArray *feeds;
     NSMutableDictionary *item;
     NSMutableString *title;
+    NSMutableString *description;
+    NSMutableString *eventType;
+    NSMutableString *date;
     NSMutableString *link;
+    NSMutableString *link2;
     NSString *element;
     NSURL *url;
 }
@@ -76,11 +80,14 @@
     
     // Set up the cell
     int storyIndex = [indexPath indexAtPosition: [indexPath length] - 1];
-    cell.textLabel.text=[[feeds objectAtIndex: storyIndex] objectForKey: @"title"];
+    NSString *cellLabel = [[feeds objectAtIndex: storyIndex] objectForKey: @"title"];
+    NSString *cellLabel2 =[[feeds objectAtIndex: storyIndex] objectForKey: @"link"];
+    NSLog(@"The link to %@ is: %@", cellLabel, cellLabel2);
+    cell.textLabel.text=[[cellLabel stringByAppendingString:@" "] stringByAppendingString: cellLabel2];
     
     return cell;
 }
-
+/*
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     // Navigation logic
     
@@ -92,12 +99,13 @@
     storyLink = [storyLink stringByReplacingOccurrencesOfString:@" " withString:@""];
     storyLink = [storyLink stringByReplacingOccurrencesOfString:@"\n" withString:@""];
     storyLink = [storyLink stringByReplacingOccurrencesOfString:@"    " withString:@""];
-    [self setUrlToNextScreen:storyLink];
+    //[self setUrlToNextScreen:storyLink];
     NSLog(@"----DKFJSDLKFJSDKF:LSD-%@",_urlToNextScreen);
    
     // open in Safari
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:storyLink]];
+    //[UIApplication sharedApplication] openURL:[NSURL URLWithString:storyLink]];
 }
+*/
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
@@ -124,18 +132,25 @@
         
         item    = [[NSMutableDictionary alloc] init];
         title   = [[NSMutableString alloc] init];
-        link    = [[NSMutableString alloc] init];
+        description = [[NSMutableString alloc] init];
+        //eventType = [[NSMutableString alloc] init];
+        //date = [[NSMutableString alloc] init];
+        link = [[NSMutableString alloc] init];
+        //link2 = [[NSMutableString alloc] init];
     }
     
 }
 
 - (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName {
-    
+    //Check for element name "item"
     if ([elementName isEqualToString:@"item"]) {
         
         [item setObject:title forKey:@"title"];
-        
+        [item setObject:description forKey:@"description"];
+        //[item setObject:eventType forKey:@"eventType"];
+        //[item setObject:date forKey:@"date"];
         [item setObject:link forKey: @"link"];
+        //[item setObject:link2 forKey:@"link2"];
         
         [feeds addObject:[item copy]];
         
@@ -145,10 +160,29 @@
 
 - (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string {
     
-    if ([element isEqualToString:@"title"]) {
+    if ([element isEqualToString:@"title"])
+    {
         [title appendString:string];
-    } else if ([element isEqualToString:@"link"]) {
+    }
+    else if ([element isEqualToString:@"description"])
+    {
+        [description appendString:string];
+    }
+    else if ([element isEqualToString:@"eventType"])
+    {
+        [eventType appendString:string];
+    }
+    else if ([element isEqualToString:@"date"])
+    {
+        [date appendString:string];
+    }
+    else if ([element isEqualToString:@"link"])
+    {
         [link appendString:string];
+    }
+    else if ([element isEqualToString:@"link2"])
+    {
+        [link2 appendString:string];
     }
 }
 
@@ -160,15 +194,14 @@
 
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    NSLog(@"LDSKJFLKDSJFSDKLFJSLDKFSDF");
     if ([[segue identifier] isEqualToString:@"showDetail"]) {
+        NSLog(@"HELLLDOSDOFJSDOFSDJFJSDFOSDFOSDJFOJSDFLJSDLJFLS");
         NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
-        
         NSString *string = [feeds[indexPath.row] objectForKey: @"link"];
-        NSLog(@"--------%@",_urlToNextScreen);
-        [[segue destinationViewController] setUrl: _urlToNextScreen];
-        NSLog(@"prepareForSegue: %@", segue.identifier);
+        [[segue destinationViewController] setUrl:string];
+        
     }
-    
         
 }
 
